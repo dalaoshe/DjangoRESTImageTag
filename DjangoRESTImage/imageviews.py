@@ -48,6 +48,7 @@ def fetch_project_image_list(request):
     try:
         project = Project.objects.get(project_id=pid)
     except Exception, e:
+        print e
         return Response(status=status.HTTP_400_BAD_REQUEST)
 
     images = project.images
@@ -55,7 +56,7 @@ def fetch_project_image_list(request):
     
     try:
         print serializers.data
-        return Response(status=status.HTTP_400_BAD_REQUEST)
     except Exception, e:
         print "Open ERRPR:", e
+        return Response(status=status.HTTP_400_BAD_REQUEST)
     return Response(serializers.data)    
