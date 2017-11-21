@@ -1,0 +1,5 @@
+*.pyc
+*.sqlite3
+
+DjangoRESTImage/migrations/
+DjangoRESTImage/migrations/*
