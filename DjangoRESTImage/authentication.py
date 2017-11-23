@@ -10,11 +10,11 @@ def jwt_response_payload_handler(token, user=None, request=None):
     delta = datetime.timedelta(days=900)
     #now = now + delta
     profile = user.userprofile
-    print "now:" ,now
+#    print "now:" ,now
     has_expire = now > profile.expire_time.replace(tzinfo=None)
     
     if has_expire:
-        print "expire account:", user , " delete"
+ #       print "expire account:", user , " delete"
         return {
             'expire': True,
             'status': 'error',

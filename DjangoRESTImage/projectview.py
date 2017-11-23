@@ -42,8 +42,6 @@ def fetch_all_project_list(request):
 @permission_classes((AccessPermission,))
 @authentication_classes((JSONWebTokenAuthentication,))
 def fetch_request_user_project_list(request):
-    print "\n\ndata:"
-    print request.data
     if request.data['type'] == 'ownered':  
         projects = request.user.projects_ownered
     elif request.data['type'] == 'created':
@@ -51,9 +49,10 @@ def fetch_request_user_project_list(request):
 
     serializers = ProjectSerializer(projects, context={'request': request}, many=True)
     try:
-        print serializers.data
+        pass
+       # print serializers.data
     except Exception,e:
-        print "Open ERRPR:", e
+        #print "Open ERRPR:", e
         return Response(status=status.HTTP_400_BAD_REQUEST)
     return Response(serializers.data)   
 
@@ -65,15 +64,13 @@ def fetch_request_user_project_list(request):
 @permission_classes((AccessPermission,))
 @authentication_classes((JSONWebTokenAuthentication,))
 def fetch_admin_project_list(request):
-    print "\n\ndata:"
-    print request.data
     
     projects = request.user.projects_created
     serializers = ProjectSerializer(projects, context={'request': request}, many=True)
     try:
-        print serializers.data
+        pass
+       # print serializers.data
     except Exception,e:
-        print "Open ERRPR:", e
         return Response(status=status.HTTP_400_BAD_REQUEST)
     return Response(serializers.data)   
 
@@ -86,8 +83,6 @@ def fetch_admin_project_list(request):
 @permission_classes((AccessPermission,))
 @authentication_classes((JSONWebTokenAuthentication,))
 def fetch_project_detail(request):
-    print "\n\ndata:"
-    print request.data
     
     try:
         project = Project.objects.get(project_id=request.data['params']['project_id'])
@@ -95,13 +90,11 @@ def fetch_project_detail(request):
         return Response(status=status.HTTP_400_BAD_REQUEST)
    
     if project.owner != request.user and project.creater != request.user:
-        print "Forbidden"
         return Response(status=status.HTTP_403_FORBIDDEN)
     
     serializers = ProjectSerializer(project, context={'request': request})
     try:
-        print serializers.data
+       pass# print serializers.data
     except Exception,e:
-        print "Open ERRPR:", e
         return Response(status=status.HTTP_400_BAD_REQUEST)
     return Response(serializers.data)    

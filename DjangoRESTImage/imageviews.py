@@ -20,15 +20,13 @@ from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 @permission_classes((AccessPermission, AdminPermission))
 @authentication_classes((JSONWebTokenAuthentication,))
 def fetch_all_image_list(request):
-    print "\n\ndata:"
-    print request.data
     
     images = Image.objects.all()
     serializers = ImageSerializer(images, context={'request': request}, many=True)
     try:
-        print serializers.data
+        pass#print serializers.data
     except Exception,e:
-        print "Open ERRPR:", e
+        pass #print "Open ERRPR:", e
     return Response(serializers.data)    
 
 
@@ -40,22 +38,19 @@ def fetch_all_image_list(request):
 @permission_classes((AccessPermission,))
 @authentication_classes((JSONWebTokenAuthentication,))
 def fetch_project_image_list(request):
-    print "\n\ndata:"
-    print request.data
 
     pid = request.data['params']['project_id']
     try:
         project = Project.objects.get(project_id=pid)
     except Exception, e:
-        print e
         return Response(status=status.HTTP_400_BAD_REQUEST)
 
     images = project.images
     serializers = ImageSerializer(images, context={'request': request}, many=True)
     
     try:
-        print serializers.data
+       pass# print serializers.data
     except Exception, e:
-        print "Open ERRPR:", e
+      #  print "Open ERRPR:", e
         return Response(status=status.HTTP_400_BAD_REQUEST)
     return Response(serializers.data)    

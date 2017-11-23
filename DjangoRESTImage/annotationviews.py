@@ -22,8 +22,6 @@ import json
 @permission_classes((AccessPermission,))
 @authentication_classes((JSONWebTokenAuthentication,))
 def fetch_all_images_annotations_list(request):
-    print "\n\ndata:"
-    print request.data
     datas = request.data
     project_ids = datas['project_ids']
     image_ids = datas['image_ids']
@@ -45,7 +43,8 @@ def fetch_all_images_annotations_list(request):
         pass
         #print serializers.data
     except Exception,e:
-        print "Open ERRPR:", e
+        pass
+        #print "Open ERRPR:", e
     
     return Response(serializers.data, status=status.HTTP_200_OK)    
 
@@ -56,8 +55,6 @@ def fetch_all_images_annotations_list(request):
 @permission_classes((AccessPermission,))
 @authentication_classes((JSONWebTokenAuthentication,))
 def submit_image_annotation(request):
-    print "\n\ndata:"
-    print request.data
 
     datas = request.data
     project_id = datas['project_id']
@@ -98,14 +95,12 @@ def submit_image_annotation(request):
 @permission_classes((AccessPermission, AdminPermission))
 @authentication_classes((JSONWebTokenAuthentication,))
 def fetch_all_annotation_list(request):
-    print "\n\ndata:"
-    print request.data
     
     annotations = Annotation.objects.all()
     serializers = AnnotationSerializer(annotations, context={'request': request}, many=True)
     try:
-        print serializers.data
+        pass
     except Exception,e:
-        print "Open ERRPR:", e
+        pass #print "Open ERRPR:", e
     return Response(serializers.data)    
 

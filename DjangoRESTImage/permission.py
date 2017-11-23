@@ -12,23 +12,23 @@ class AccessPermission(permissions.BasePermission):
         if request.user.is_anonymous():
             return False
         else:
-            print "User:", request.user
-            print "Auth:", request.auth
-            print "Request", request
-            print "Payload:", payload
-            print "Profile Register:",profile.register_time
-            print "Profile Expire:",profile.expire_time
-            print "Now:" ,now
-            print "Priviledge:",payload['role']
+#            print "User:", request.user
+#            print "Auth:", request.auth
+#            print "Request", request
+#            print "Payload:", payload
+#            print "Profile Register:",profile.register_time
+#            print "Profile Expire:",profile.expire_time
+#            print "Now:" ,now
+#            print "Priviledge:",payload['role']
 
             r1 = now > profile.register_time.replace(tzinfo=None)
             has_expire = now > profile.expire_time.replace(tzinfo=None)
             if has_expire:
-                print "expire account:", request.user , " delete"
+#                print "expire account:", request.user , " delete"
                 request.user.delete()
                 return False
             
-            print "Expire Register:",r1," Expired:", has_expire
+ #           print "Expire Register:",r1," Expired:", has_expire
             
             return True
 

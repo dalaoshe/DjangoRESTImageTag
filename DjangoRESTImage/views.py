@@ -36,15 +36,13 @@ class GroupViewSet(viewsets.ModelViewSet):
 @permission_classes((AccessPermission, AdminPermission))
 @authentication_classes((JSONWebTokenAuthentication,))
 def user_list(request):
-    print "\n\ndata:"
-    print request.data
 
     users = User.objects.all()
     serializers = UserSerializer(users, context={'request': request}, many=True)
     try:
-        print serializers.data
+        pass
     except Exception,e:
-        print "Open ERRPR:", e
+        pass
     return Response(serializers.data)    
 
 
@@ -52,8 +50,6 @@ def user_list(request):
 @permission_classes((AccessPermission,))
 @authentication_classes((JSONWebTokenAuthentication,))
 def detail_user_info(request):
-    print "\n\ndata:"
-    print request.data
     user = request.user
     profile = request.user.userprofile
     res = {
@@ -69,7 +65,6 @@ def detail_user_info(request):
 def init_database(request):
     user = User.objects.filter(username='dalaoshe')
     if len(user) == 0:
-        print "New User"
         user = User(username='dalaoshe', password='clyb0515')
         user.set_password('clyb0515')
         user.save()
