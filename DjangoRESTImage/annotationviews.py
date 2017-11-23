@@ -5,12 +5,13 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
 
-from rest_framework.authentication import TokenAuthentication
-from rest_framework.authtoken.models import Token
+from django.contrib.auth.models import User
 
 from DjangoRESTImage.serializers import *
-from django.contrib.auth.models import User
 from DjangoRESTImage.permission import * 
+from DjangoRESTImage.authentication import *
+
+from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 
 import json
 
@@ -19,7 +20,7 @@ import json
 """
 @api_view(['GET', 'POST'])
 @permission_classes((AccessPermission,))
-@authentication_classes((TokenAuthentication,))
+@authentication_classes((JSONWebTokenAuthentication,))
 def fetch_all_images_annotations_list(request):
     print "\n\ndata:"
     print request.data
@@ -53,7 +54,7 @@ def fetch_all_images_annotations_list(request):
 """
 @api_view(['GET', 'POST'])
 @permission_classes((AccessPermission,))
-@authentication_classes((TokenAuthentication,))
+@authentication_classes((JSONWebTokenAuthentication,))
 def submit_image_annotation(request):
     print "\n\ndata:"
     print request.data
@@ -94,6 +95,8 @@ def submit_image_annotation(request):
     获取所有annotation信息
 """
 @api_view(['GET', 'POST'])
+@permission_classes((AccessPermission, AdminPermission))
+@authentication_classes((JSONWebTokenAuthentication,))
 def fetch_all_annotation_list(request):
     print "\n\ndata:"
     print request.data

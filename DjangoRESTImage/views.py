@@ -5,14 +5,15 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
 
-from rest_framework.authentication import TokenAuthentication
-from rest_framework.authtoken.models import Token
 
 from DjangoRESTImage.serializers import *
 from django.contrib.auth.models import User
-from DjangoRESTImage.permission import * 
 
-import json
+from DjangoRESTImage.permission import * 
+from DjangoRESTImage.authentication import *
+from rest_framework_jwt.authentication import JSONWebTokenAuthentication
+
+import json,datetime
 
 class UserViewSet(viewsets.ModelViewSet):
     """
@@ -30,24 +31,10 @@ class GroupViewSet(viewsets.ModelViewSet):
     serializer_class = GroupSerializer
 
 
-@api_view(['GET', 'POST'])
-def login(request):
-    print "\n\ndata:"
-    print request.data
-
-    data = request.data
-    users = User.objects.filter(username=data['username'])
-    print users
-    ser = UserSerializer(users, context={'request': request}, many=True)
-    print 'seri:'
-    try:
-        print ser.data
-    except Exception,e:
-        print "Open ERRPR:", e
-    return Response(ser.data)      
-
 
 @api_view(['GET', 'POST'])
+@permission_classes((AccessPermission, AdminPermission))
+@authentication_classes((JSONWebTokenAuthentication,))
 def user_list(request):
     print "\n\ndata:"
     print request.data
@@ -61,10 +48,25 @@ def user_list(request):
     return Response(serializers.data)    
 
 
+@api_view(['GET', 'POST'])
+@permission_classes((AccessPermission,))
+@authentication_classes((JSONWebTokenAuthentication,))
+def detail_user_info(request):
+    print "\n\ndata:"
+    print request.data
+    user = request.user
+    profile = request.user.userprofile
+    res = {
+        'name': user.username,
+        'role': profile.role,
+        'status': 'ok',
+        'notifyCount': 12,
+            }
+    return Response(res)    
+
 
 @api_view(['GET', 'POST'])
 def init_database(request):
-   
     user = User.objects.filter(username='dalaoshe')
     if len(user) == 0:
         print "New User"
@@ -73,7 +75,6 @@ def init_database(request):
         user.save()
     else: 
         user = user[0]
-   
 
     admin = User.objects.filter(username='admin') 
     if len(admin) == 0:
@@ -82,6 +83,12 @@ def init_database(request):
         admin.save()
     else:
         admin = admin[0]
+    
+    delta = datetime.timedelta(days=10000)
+    expire = delta + datetime.datetime.now()
+    admin.userprofile.expire_time = expire 
+    admin.userprofile.role = "admin"
+    admin.userprofile.save()
 
     image1 =  Image.objects.filter(title='image1')
     if len(image1) == 0:
@@ -117,18 +124,14 @@ def init_database(request):
     else: 
         image3 = image3[0]
 
-
-    for u in User.objects.all():
-        token = Token.objects.get_or_create(user=u)
-        print token
     
     params = dict()
     params['types'] = ['woman', 'dog', 'snack']
 
     projects1 = Project(project_type='cropper', creater=admin, owner=user,
-            params=json.dumps(params))
+            params=json.dumps(params), title='cropper_project')
     projects2 = Project(project_type='similar', creater=admin, owner=user,
-            params=json.dumps(params))
+            params=json.dumps(params), title='similar_project')
     projects1.save()
     projects2.save()
     projects1.images.add(image1)
@@ -142,18 +145,3 @@ def init_database(request):
 
     return Response(status=status.HTTP_200_OK)    
 
-def logout(request):
-    print "body:"
-    print request.body
-    data = {'abc': '123'}
-    users = User.objects.all()
-    print users
-    ser = UserSerializer(users, context={'request': request}, many=True)
-    print 'seri:'
-    try:
-        print ser.data
-    except Exception,e:
-        print "ERRPR:", e
-        
-    return Response(ser.data, safe=False, status=200)
-# Create your views here.
