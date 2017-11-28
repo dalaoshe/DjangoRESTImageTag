@@ -1,3 +1,5 @@
+import settings
+
 from django.conf.urls import url, include
 from django.contrib import admin
 from django.contrib.auth.models import User
@@ -52,3 +54,4 @@ urlpatterns = [
     url(r'^user/obtaintoken/', authview.obtain_auth_token),
     url(r'^user/init/', views.init_database)
 ]
+
