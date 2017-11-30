@@ -110,13 +110,12 @@ X-Frame-Options: SAMEORIGIN
     ...
 ]
 ```
-### Confirgure By Nginx
-
-1. Install `nginx` by `apt-get` first: 
+### Confirgure By Nginx 
+1.Install `nginx` by `apt-get` first:   
 ```
 :~$ sudo apt-get install nginx
 ```
-2. modify the `chdir` and `socket` in file `uwsgi.ini`, according to your setting:
+2.modify the `chdir` and `socket` in file `uwsgi.ini`, according to your setting:
 ```
 [uwsgi]
 #the local unix socket file than commnuincate to Nginx, change to the port your like
@@ -135,8 +134,8 @@ threads = 2
 stats = 127.0.0.1:9191
 # clear environment on exit
 vacuum          = true
-```  
-3. add follow nginx setting to you `nginx.conf`:
+```
+3.add follow nginx setting to you `nginx.conf`:
 ```
 server {
         listen       58080;
@@ -153,12 +152,12 @@ server {
 		}
     }
 ```
-4. restart `nginx` and start `uwsgi`:
+4.restart `nginx` and start `uwsgi`:
 ```
 ~:$ sudo service nginx restart
 ~:$ ./run_as_server.sh # start uwsgi by `uwsgi.ini`
 ```
-5. then, you can check the REST API and login `Django admin` in browser
+5.then, you can check the REST API and login `Django admin` in browser
 
 
 
