@@ -36,7 +36,6 @@ class GroupViewSet(viewsets.ModelViewSet):
 @permission_classes((AccessPermission, AdminPermission))
 @authentication_classes((JSONWebTokenAuthentication,))
 def user_list(request):
-
     users = User.objects.all()
     serializers = UserSerializer(users, context={'request': request}, many=True)
     try:
