@@ -1,9 +1,13 @@
 # React-Multi-Cropper
 
-
+A `Django` REST Web Server Based On `djangorestframework` [Home-Django REST framework](http://www.django-rest-framework.org/)  
 
 ## Feature
-A `Django` REST Web Server Based On `djangorestframework` [Home-Django REST framework](http://www.django-rest-framework.org/)
+- Support Token Authen By JWTToken
+- REST API
+- `sqlite3` Database (can change to other)
+
+
 ## Require
 - `python2.7`
 - `Django` >= 1.11.0  
