@@ -28,7 +28,7 @@ Third, start the server and init the `db.sqlite3` test data
 :~$ curl http://localhost:48080/user/init/ # create test data, include a admin user and a test user, two projects and three images
 ``` 
 ### Test REST API
-Then, you can use `httpie` to test the REST API, for `example`:
+Then, you can use `httpie` to test the REST API, for `example`:  
 1.fetch the jwt login token of admin user 
 ```
 :~$ http http://localhost:48080/user/obtainjwttoken/ "username=admin" "password=dalaoshe" 
