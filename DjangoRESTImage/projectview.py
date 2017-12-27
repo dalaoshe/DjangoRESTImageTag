@@ -85,7 +85,7 @@ def fetch_admin_project_list(request):
 def fetch_project_detail(request):
     
     try:
-        project = Project.objects.get(project_id=request.data['params']['project_id'])
+        project = Project.objects.get(project_id=request.data['project_id'])
     except Exception,e:
         return Response(status=status.HTTP_400_BAD_REQUEST)
    
@@ -98,3 +98,126 @@ def fetch_project_detail(request):
     except Exception,e:
         return Response(status=status.HTTP_400_BAD_REQUEST)
     return Response(serializers.data)    
+
+
+"""
+    建立一个Project
+"""
+@api_view(['GET', 'POST'])
+@permission_classes((AccessPermission, AdminPermission,))
+@authentication_classes((JSONWebTokenAuthentication,))
+def manage_project(request):
+    rsp = dict()
+
+    # check op
+    try:
+        op = request.data['op']
+    except Exception, e:
+        rsp['status'] = 'error'
+        rsp['message'] = 'invalid data format'
+        return Response(rsp, status=status.HTTP_200_OK)    
+    
+    if op != 'delete':
+        # check data format
+        try:    
+            # check title 
+            title = request.data['title']
+            # check creater exist
+            creater = User.objects.filter(username=request.data['creater'])
+            if len(creater) == 0 or creater[0].userprofile.role != 'admin':
+                rsp['status'] = 'error'
+                rsp['message'] = 'error creater username'
+                return Response(rsp, status=status.HTTP_200_OK)    
+            creater = creater[0]
+            # check owner
+            owner = User.objects.filter(username=request.data['owner'])
+            if len(owner) == 0:
+                rsp['status'] = 'error'
+                rsp['message'] = 'error owner username'
+                return Response(rsp, status=status.HTTP_200_OK)    
+            owner = owner[0]
+            # check images
+            images = request.data['images']['images']
+            image_objs = list()
+            for img_info in images:
+                img = Image.objects.filter(title=img_info['title'])
+                if len(img) == 0:
+                    img = Image(title=img_info['title'],
+                            image_src=img_info['image_src'],
+                            width=img_info['width'], height=img_info['height'])
+                    img.save()
+                else:
+                    img = img[0]
+                image_objs.append(img)
+            # check project_type 
+            project_type = request.data['project_type']
+            # check params
+            params = request.data['params'].replace(" ","")
+            if project_type == 'cropper':
+                types = params.split(";")
+                params = dict()
+                params['types'] = types
+
+            if op == 'modify':
+                project_id = request.data['project_id']
+        except Exception, e:
+            rsp['status'] = 'error'
+            rsp['message'] = 'invalid data format'
+            return Response(rsp, status=status.HTTP_200_OK)    
+    else:
+        try:
+            project_id = request.data['project_id']
+        except Exception, e:
+            rsp['status'] = 'error'
+            rsp['message'] = 'invalid data format'
+            return Response(rsp, status=status.HTTP_200_OK)    
+
+
+
+    try:
+        if op == "create":
+            project = Project(project_type=project_type,
+                    creater=creater,
+                    owner=owner,
+                    params=json.dumps(params),
+                    title=title)
+            project.save()
+            for img in image_objs:
+                project.images.add(img)
+        elif op == "modify":
+            project = Project.objects.filter(project_id=project_id)
+            if len(project) == 0:
+                rsp['status'] = 'error'
+                rsp['message'] = 'no such project'
+                return Response(rsp, status=status.HTTP_200_OK)    
+            project = project[0]
+            project.project_type = project_type
+            project.creater = creater
+            project.owner = owner
+            project.params = json.dumps(params)
+            project.title = title
+            
+            for img in project.images.all():
+                project.images.remove(img)
+
+            project.save()
+            for img in image_objs:
+                project.images.add(img)
+
+        elif op == "delete":  
+            project = Project.objects.filter(project_id=project_id)
+            if len(project) == 0:
+                rsp['status'] = 'error'
+                rsp['message'] = 'no such project'
+                return Response(rsp, status=status.HTTP_200_OK)    
+            project = project[0]
+            project.delete()
+    except Exception, e:
+        rsp['status'] = 'error'
+        rsp['message'] = 'something wrong???'
+        print e
+        return Response(rsp, status=status.HTTP_200_OK)    
+
+    rsp['status'] = 'success'
+    rsp['message'] = 'success'
+    return Response(rsp, status=status.HTTP_200_OK)    

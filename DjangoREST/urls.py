@@ -33,6 +33,8 @@ urlpatterns = [
         projectview.fetch_project_detail),
     url(r'^user/adminprojects/',
         projectview.fetch_admin_project_list),
+    url(r'^user/manageproject/',
+        projectview.manage_project),
     
     url(r'^user/images/', imageviews.fetch_all_image_list),
     url(r'^user/projectimages/',

@@ -17,7 +17,7 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         write_only=False
-        fields = ('id','is_active', 'password', 'username', 'email', 'groups',
+        fields = ('id','is_active', 'username', 'email', 'groups',
                 'projects_created', 'projects_ownered')
 
 class ImageSerializer(serializers.ModelSerializer):
@@ -25,7 +25,7 @@ class ImageSerializer(serializers.ModelSerializer):
             queryset=Project.objects.all())
     class Meta:
         model = Image
-        fields = ('image_id', 'image_src', 'width', 'height', 'projects',)
+        fields = ('title','image_id', 'image_src', 'width', 'height', 'projects',)
 
 
 class ProjectSerializer(serializers.ModelSerializer):

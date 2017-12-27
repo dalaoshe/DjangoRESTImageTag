@@ -39,7 +39,7 @@ def fetch_all_image_list(request):
 @authentication_classes((JSONWebTokenAuthentication,))
 def fetch_project_image_list(request):
 
-    pid = request.data['params']['project_id']
+    pid = request.data['project_id']
     try:
         project = Project.objects.get(project_id=pid)
     except Exception, e:
