@@ -44,6 +44,74 @@ def user_list(request):
         pass
     return Response(serializers.data)    
 
+@api_view(['GET', 'POST'])
+@permission_classes((AccessPermission, AdminPermission))
+@authentication_classes((JSONWebTokenAuthentication,))
+def manage_user(request):
+    rsp = dict()
+    print request.data    
+    # check op
+    try:
+        op = request.data['op']
+    except Exception, e:
+        rsp['status'] = 'error'
+        rsp['message'] = 'invalid data format'
+        return Response(rsp, status=status.HTTP_200_OK)    
+    
+    try:    
+        if op != 'delete':
+            username = request.data['username'] 
+            expire_time = request.data['expiretime']
+        if op == 'create':
+            password = request.data['password']
+        if op != 'create':
+            id = request.data['id']
+    except Exception, e:
+        rsp['status'] = 'error'
+        rsp['message'] = 'invalid data format'
+        return Response(rsp, status=status.HTTP_200_OK)    
+
+
+
+    try:
+        if op == "create":
+            user = User(username=username)
+            user.set_password(password)
+            user.save()
+            user.userprofile.expire_time = expire_time
+            user.userprofile.role = "user"
+            user.userprofile.save()
+        elif op == "modify":
+            user = User.objects.filter(id=id)
+            if len(user) == 0:
+                rsp['status'] = 'error'
+                rsp['message'] = 'no such user'
+                return Response(rsp, status=status.HTTP_200_OK)    
+            user = user[0]
+            user.username = username
+            user.save()
+            user.userprofile.expire_time = expire_time
+            user.userprofile.save()
+
+        elif op == "delete":  
+            user = User.objects.filter(id=id)
+            if len(user) == 0:
+                rsp['status'] = 'error'
+                rsp['message'] = 'no such user'
+                return Response(rsp, status=status.HTTP_200_OK)    
+            user = user[0]
+            user.delete()
+    
+    except Exception, e:
+        rsp['status'] = 'error'
+        rsp['message'] = 'something wrong???'
+        print e
+        return Response(rsp, status=status.HTTP_200_OK)    
+
+    rsp['status'] = 'success'
+    rsp['message'] = 'success'
+    return Response(rsp, status=status.HTTP_200_OK)    
+
 
 @api_view(['GET', 'POST'])
 @permission_classes((AccessPermission,))
@@ -58,6 +126,38 @@ def detail_user_info(request):
         'notifyCount': 12,
             }
     return Response(res)    
+
+
+@api_view(['GET', 'POST'])
+@permission_classes((AccessPermission, AdminPermission))
+@authentication_classes((JSONWebTokenAuthentication,))
+def get_detail_user_info_by_id(request):
+    rsp = dict() 
+    try:
+        id = request.data['id']
+    except Exception, e:
+        rsp['status'] = 'error'
+        rsp['message'] = 'invalid data format'
+        return Response(rsp, status=status.HTTP_200_OK)    
+   
+    try:
+        user = User.objects.get(id=id)
+    except Exception, e:
+        rsp['status'] = 'error'
+        rsp['message'] = 'no such user'
+        return Response(rsp, status=status.HTTP_200_OK)    
+
+
+    profile = user.userprofile
+    res = {
+        'id': user.id,
+        'username': user.username,
+        'role': profile.role,
+        'createtime': profile.register_time,
+        'expiretime': profile.expire_time,
+        'status': 'ok'
+    }
+    return Response(res, status=status.HTTP_200_OK)    
 
 
 @api_view(['GET', 'POST'])

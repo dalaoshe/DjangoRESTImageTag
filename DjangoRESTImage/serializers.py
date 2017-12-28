@@ -7,6 +7,11 @@ class GroupSerializer(serializers.ModelSerializer):
         model = Group
         fields = ('name')
 
+class UserProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserProfile
+        fields = ('register_time', 'expire_time', 'role')
+
 class UserSerializer(serializers.ModelSerializer):
     projects_ownered = serializers.PrimaryKeyRelatedField(many=True,
             queryset=Project.objects.all())
@@ -14,11 +19,13 @@ class UserSerializer(serializers.ModelSerializer):
     projects_created = serializers.PrimaryKeyRelatedField(many=True,
             queryset=Project.objects.all())
     
+    userprofile = UserProfileSerializer('userprofile')
+    
     class Meta:
         model = User
         write_only=False
         fields = ('id','is_active', 'username', 'email', 'groups',
-                'projects_created', 'projects_ownered')
+                'projects_created', 'projects_ownered','userprofile')
 
 class ImageSerializer(serializers.ModelSerializer):
     projects = serializers.PrimaryKeyRelatedField(many=True,

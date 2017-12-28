@@ -52,6 +52,8 @@ urlpatterns = [
     #url(r'^user/obtainmyjwttoken/', MyTokenObtainPairView.as_view(), name='token_obtain_pair'),
     
     url(r'^user/users/', views.user_list),
+    url(r'^user/manageuser/', views.manage_user),
+    url(r'^user/userdetailbyid/', views.get_detail_user_info_by_id),
     url(r'^user/userdetail/', views.detail_user_info),
     url(r'^user/obtaintoken/', authview.obtain_auth_token),
     url(r'^user/init/', views.init_database)
