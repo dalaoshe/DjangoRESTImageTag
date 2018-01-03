@@ -83,7 +83,6 @@ def fetch_admin_project_list(request):
 @permission_classes((AccessPermission,))
 @authentication_classes((JSONWebTokenAuthentication,))
 def fetch_project_detail(request):
-    
     try:
         project = Project.objects.get(project_id=request.data['project_id'])
     except Exception,e:
@@ -101,14 +100,13 @@ def fetch_project_detail(request):
 
 
 """
-    建立一个Project
+    管理Project
 """
 @api_view(['GET', 'POST'])
 @permission_classes((AccessPermission, AdminPermission,))
 @authentication_classes((JSONWebTokenAuthentication,))
 def manage_project(request):
     rsp = dict()
-
     # check op
     try:
         op = request.data['op']
@@ -149,20 +147,22 @@ def manage_project(request):
                 else:
                     img = img[0]
                 image_objs.append(img)
-            # check project_type 
+            # check project_type and params 
             project_type = request.data['project_type']
-            # check params
             params = request.data['params'].replace(" ","")
-            if project_type == 'cropper':
+            if  project_type == "tag" or project_type == 'cropper':
                 types = params.split(";")
                 params = dict()
                 params['types'] = types
+            else:
+                params = json.loads(params)
 
             if op == 'modify':
                 project_id = request.data['project_id']
         except Exception, e:
             rsp['status'] = 'error'
             rsp['message'] = 'invalid data format'
+            print e
             return Response(rsp, status=status.HTTP_200_OK)    
     else:
         try:
@@ -182,8 +182,18 @@ def manage_project(request):
                     params=json.dumps(params),
                     title=title)
             project.save()
-            for img in image_objs:
+            for i,img in enumerate(image_objs):
                 project.images.add(img)
+                if project_type == "similar":
+                    content = params[i]
+                    annotation = Annotation(
+                        project=project,
+                        image=img,
+                        content=json.dumps(content),
+                        annotation_type=project_type,
+                    )
+                    annotation.save()
+
         elif op == "modify":
             project = Project.objects.filter(project_id=project_id)
             if len(project) == 0:
@@ -201,8 +211,16 @@ def manage_project(request):
                 project.images.remove(img)
 
             project.save()
-            for img in image_objs:
+            for i,img in enumerate(image_objs):
                 project.images.add(img)
+                if project_type == "similar":
+                    content = params[i]
+                    annotation = Annotation.objects.filter(
+                        project__project_id=project.project_id,
+                        image__image_id=img.image_id
+                    )[0]
+                    annotation.content = json.dumps(content)
+                    annotation.save()
 
         elif op == "delete":  
             project = Project.objects.filter(project_id=project_id)

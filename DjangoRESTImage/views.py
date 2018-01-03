@@ -78,7 +78,8 @@ def manage_user(request):
             user = User(username=username)
             user.set_password(password)
             user.save()
-            user.userprofile.expire_time = expire_time
+            if expire_time != None and expire_time != '':
+                user.userprofile.expire_time = expire_time
             user.userprofile.role = "user"
             user.userprofile.save()
         elif op == "modify":
@@ -219,23 +220,93 @@ def init_database(request):
         image3 = image3[0]
 
     
-    params = dict()
-    params['types'] = ['woman', 'dog', 'snack']
+    params1 = dict()
+    params2 = dict()
+    params3 = dict()
+    params1['types'] = ['woman', 'dog', 'snack']
+    params2 =[
+                [
+                            {"image_src":"https://img10.360buyimg.com/n5/s500x640_jfs/t7687/164/1418188723/543130/fd1af88e/599ce253N071b3037.png!cc_50x64.jpg",
+                                "relation":"0"},
+                                    {"image_src":"https://img10.360buyimg.com/n5/s500x640_jfs/t8080/336/277921481/355263/bbdf4bc2/59a51616Nde18895a.jpg!cc_50x64.jpg",
+                                        "relation":"1"}
+                                        
+                                        ],
+                    [
+
+                                {"image_src":"https://img10.360buyimg.com/n5/s500x640_jfs/t7687/164/1418188723/543130/fd1af88e/599ce253N071b3037.png!cc_50x64.jpg",
+                                    "relation":"1"},
+                                        {"image_src":"https://img10.360buyimg.com/n5/s500x640_jfs/t8080/336/277921481/355263/bbdf4bc2/59a51616Nde18895a.jpg!cc_50x64.jpg",
+                                            "relation":"1"}
+
+                                            ],
+                    [
+
+                                {"image_src":"https://img10.360buyimg.com/n5/s500x640_jfs/t7687/164/1418188723/543130/fd1af88e/599ce253N071b3037.png!cc_50x64.jpg",
+                                    "relation":"1"}
+                                            ]
+             ]
+    params3['types'] = ['woman']
 
     projects1 = Project(project_type='cropper', creater=admin, owner=user,
-            params=json.dumps(params), title='cropper_project')
+            params=json.dumps(params1), title='cropper_project')
     projects2 = Project(project_type='similar', creater=admin, owner=user,
-            params=json.dumps(params), title='similar_project')
-    projects1.save()
-    projects2.save()
-    projects1.images.add(image1)
-    projects1.images.add(image2)
-    projects1.images.add(image3)
-    projects2.images.add(image1)
-    projects2.images.add(image2)
-    projects2.images.add(image3)
+            params=json.dumps(params2), title='similar_project')
+    projects3 = Project(project_type='tag', creater=admin, owner=user,
+            params=json.dumps(params3), title='tag_project')
+    if len(Project.objects.filter(title='cropper_project')) == 0:
+        projects1.save()
+        projects1.images.add(image1)
+        projects1.images.add(image2)
+        projects1.images.add(image3)
+    
+    if len(Project.objects.filter(title='similar_project')) == 0:
+        projects2.save()
+        projects2.images.add(image1)
+        projects2.images.add(image2)
+        projects2.images.add(image3)
+    
+    if len(Project.objects.filter(title='tag_project')) == 0:
+        projects3.save()
+        projects3.images.add(image1)
+        projects3.images.add(image2)
 
     
+    init_task('similar2_project', 'similar', 
+            user, admin, params2, [image1, image2, image3])
 
     return Response(status=status.HTTP_200_OK)    
+
+
+def init_task(title, project_type, user, admin, params, images):
+    projects = Project.objects.filter(title=title)
+    if len(projects) > 0:
+        projects[0].delete()
+    project = Project(project_type=project_type, creater=admin, owner=user, params=json.dumps(params), title=title)
+    project.save()
+    for img in images:
+        project.images.add(img)
+        if project_type == "similar":
+            content = [
+                {
+                    'image_src':'https://img10.360buyimg.com/n5/s500x640_jfs/t7687/164/1418188723/543130/fd1af88e/599ce253N071b3037.png!cc_50x64.jpg',
+                  'relation': 0
+                  },
+                {
+                    'image_src':'https://img10.360buyimg.com/n5/s500x640_jfs/t8080/336/277921481/355263/bbdf4bc2/59a51616Nde18895a.jpg!cc_50x64.jpg', 
+                   'relation': 1    
+                },
+                {
+                    'image_src':'http://img14.360buyimg.com/n5/s500x640_jfs/t10270/263/1662108454/94989/e9c4a3fb/59e44eabNc1cbd5ef.jpg', 
+                    'relation':0
+                }
+                    ]
+            annotation = Annotation(
+                project=project,
+                image=img,
+                content=json.dumps(content),
+                annotation_type=project_type,
+            )
+            annotation.save()
+
 
