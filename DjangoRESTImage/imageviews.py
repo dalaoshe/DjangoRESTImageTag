@@ -38,7 +38,6 @@ def fetch_all_image_list(request):
 @permission_classes((AccessPermission,))
 @authentication_classes((JSONWebTokenAuthentication,))
 def fetch_project_image_list(request):
-
     pid = request.data['project_id']
     try:
         project = Project.objects.get(project_id=pid)

@@ -260,11 +260,10 @@ def init_database(request):
         projects1.images.add(image2)
         projects1.images.add(image3)
     
-    if len(Project.objects.filter(title='similar_project')) == 0:
-        projects2.save()
-        projects2.images.add(image1)
-        projects2.images.add(image2)
-        projects2.images.add(image3)
+    
+    init_task('similar_project', 'similar', 
+            user, admin, params2, [image1, image2, image3])
+    
     
     if len(Project.objects.filter(title='tag_project')) == 0:
         projects3.save()
@@ -272,8 +271,6 @@ def init_database(request):
         projects3.images.add(image2)
 
     
-    init_task('similar2_project', 'similar', 
-            user, admin, params2, [image1, image2, image3])
 
     return Response(status=status.HTTP_200_OK)    
 

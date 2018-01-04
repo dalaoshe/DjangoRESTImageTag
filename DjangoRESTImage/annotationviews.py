@@ -55,7 +55,6 @@ def fetch_all_images_annotations_list(request):
 @permission_classes((AccessPermission,))
 @authentication_classes((JSONWebTokenAuthentication,))
 def submit_image_annotation(request):
-
     datas = request.data
     project_id = datas['project_id']
     image_id = datas['image_id']

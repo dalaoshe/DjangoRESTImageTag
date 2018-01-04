@@ -64,7 +64,6 @@ def fetch_request_user_project_list(request):
 @permission_classes((AccessPermission,))
 @authentication_classes((JSONWebTokenAuthentication,))
 def fetch_admin_project_list(request):
-    
     projects = request.user.projects_created
     serializers = ProjectSerializer(projects, context={'request': request}, many=True)
     try:
